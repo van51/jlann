@@ -1,0 +1,10 @@
+ANN_INCLUDE_DIR := 
+ANN_LIB_DIR :=
+EIGEN_INCLUDE_DIR :=
+
+FLAGS := -O3 -std=c++11 -pthread
+INCLUDE := -I$(EIGEN_INCLUDE_DIR) -I$(ANN_INCLUDE_DIR) -I/include
+LIBS := -L$(ANN_LIB_DIR) -lANN -lboost_program_options 
+(all): src/main.cpp
+	g++ $(FLAGS) $(INCLUDE) src/main.cpp $(LIBS) -o main
+
