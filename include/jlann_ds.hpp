@@ -94,6 +94,48 @@ public:
 		}
 	}
 
+	std::vector<int> findNearestNeighbors(JLMatrix& queries, double epsilon) {
+		std::vector<int> nns;
+		std::vector<double> nnDists;
+		nns.reserve(queries.rows());
+		nnDists.reserve(queries.rows());
+		for (int i=0; i<queries.rows(); i++){
+			nns.push_back(-1);
+			nnDists.push_back(-1);
+		}
+		for (int currentDs=0; currentDs<numberOfDs; currentDs++) {
+			JLMatrix projectedQueries = queries * (*projectionMatrices[currentDs]);
+			auto queriesData = projectedQueries.data();
+			for (int i=0; i<projectedQueries.rows(); i++) {
+				auto queryPoint = queries.row(i);
+				for (int j=0; j<projDimension; j++) {
+					annQueryPt[j] = *(queriesData);
+					queriesData++;
+				}
+
+	        	this->bdTree[currentDs]->annkSearch(
+	        	    annQueryPt,
+	        	    projSearchSize,
+	        	    annIdx,
+	        	    dists,
+	        	    epsilon
+	        	);
+	
+	        	for (int k=0; k<projSearchSize; k++) {
+	        	    if (annIdx[k]==-1) {
+	        	        break;
+	        	    }
+					double distance = (queryPoint-originalPoints.row(annIdx[k])).norm();
+	        	    if (distance<nnDists[i] || nnDists[i]<0) {
+	        	        nnDists[i] = distance;
+	        	        nns[i] = annIdx[k];
+	        	    }
+	        	}
+			}
+		}
+		return nns;
+	}
+
 	int findNearestNeighbor(JLVector& queryPoint, double epsilon) {
 
 		int minDistance=-1;

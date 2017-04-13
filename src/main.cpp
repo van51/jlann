@@ -81,21 +81,39 @@ void queryJl(jlann::JLAnnDS<dtype>* jlAnnDs, double epsilon, JLMatrix& dataset, 
 	int trueNn = 0;
 	int ann = 0;
 	double annQueryTime = 0;
-	for (int i=0; i<numberOfQueries; i++) {
-		Timer timer;
-		JLVector query = queries.row(i);
-		int nnIndex = jlAnnDs->findNearestNeighbor(query, epsilon);
-		annQueryTime += timer.elapsed_seconds();
+	//for (int i=0; i<numberOfQueries; i++) {
+	//	Timer timer;
+	//	JLVector query = queries.row(i);
+	//	int nnIndex = jlAnnDs->findNearestNeighbor(query, epsilon);
+	//	annQueryTime += timer.elapsed_seconds();
 
-		double nnDist = (dataset.row(groundtruth(i, 0))-query).norm();
-		double annDist = (dataset.row(nnIndex)-query).norm();
+	//	double nnDist = (dataset.row(groundtruth(i, 0))-query).norm();
+	//	double annDist = (dataset.row(nnIndex)-query).norm();
+	//	//cout << annDist << " <= " << "(1+" << epsilon << ")*" << nnDist << " = " << (1+epsilon)*nnDist << endl;
+
+	//	if (nnIndex==groundtruth(i, 0)) {
+	//		++trueNn;
+	//	}
+	//	for (int j=1; j<groundtruth.cols(); j++) {
+	//		if (nnIndex==groundtruth(i, j)) {
+	//			++ann;
+	//		}
+	//	}
+	//}
+	Timer batchTimer;
+	std::vector<int> nns = jlAnnDs->findNearestNeighbors(queries, epsilon);
+	annQueryTime = batchTimer.elapsed_seconds();
+
+	for (int i=0; i<numberOfQueries; i++) {
+		double nnDist = (dataset.row(groundtruth(i, 0))-queries.row(i)).norm();
+		//double annDist = (dataset.row(nnIndex)-query).norm();
 		//cout << annDist << " <= " << "(1+" << epsilon << ")*" << nnDist << " = " << (1+epsilon)*nnDist << endl;
 
-		if (nnIndex==groundtruth(i, 0)) {
+		if (nns[i]==groundtruth(i, 0)) {
 			++trueNn;
 		}
 		for (int j=1; j<groundtruth.cols(); j++) {
-			if (nnIndex==groundtruth(i, j)) {
+			if (nns[i]==groundtruth(i, j)) {
 				++ann;
 			}
 		}
